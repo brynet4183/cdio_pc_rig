@@ -17,12 +17,107 @@ import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Subdiv2D;
-
+import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 public class Main {
-    public static void main(String[] args) {
-        // Load the OpenCV library
+    public static void main(String[] args) throws IOException {
+        int[] arr = {0, 0, 0, 255, 255, 255, 4, 5, 5, 2};
+        HighGui.namedWindow("Webcam Feed");
+
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        while(true){
+            File file = new File("C:\\Users\\John\\Desktop\\test.txt");
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String st;
+            int i = 0;
+            while ((st = br.readLine()) != null & i < 10) {
+                arr[i] = Integer.parseInt(st);
+                i++;
+            }
+            // Load the input image
+            Mat input = Imgcodecs.imread("C:\\Users\\John\\Desktop\\input" + arr[6] + ".jpg");
+            Imgproc.resize(input, input, new Size(512, 384));;
+            // Convert the image to HSV color space
+            Mat hsv = new Mat();
+            Imgproc.GaussianBlur(input, input, new Size(9, 9), 0, 0);
+
+            // Define the range of orange color in HSV
+            Scalar lowerOrange = new Scalar(arr[0], arr[1], arr[2]);
+            Scalar upperOrange = new Scalar(arr[3], arr[4], arr[5]);
+            Core.inRange(input, lowerOrange, upperOrange, input); //hsv
+
+            // Apply morphology operations to remove noise and fill gaps
+            Mat kernel = Imgproc.getStructuringElement((arr[9] == 0 ? Imgproc.MORPH_ELLIPSE : (arr[9] == 1 ? Imgproc.MORPH_RECT : Imgproc.MORPH_CROSS)) , new Size(arr[7], arr[8]));
+            Imgproc.morphologyEx(input, input, Imgproc.MORPH_OPEN, kernel);
+            Imgproc.morphologyEx(input, input, Imgproc.MORPH_CLOSE, kernel);
+
+            /*
+            // Find contours of the orange regions
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(input, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            // Loop through the contours and filter out small or non-rectangular ones
+            for (MatOfPoint contour : contours) {
+                double area = Imgproc.contourArea(contour);
+                Rect rect = Imgproc.boundingRect(contour);
+                double aspectRatio = (double) rect.width / rect.height;
+                if (area > 1000 && aspectRatio > 0.5 && aspectRatio < 2.0) {
+                    // Draw a rectangle around the orange region
+                    Imgproc.rectangle(input, rect, new Scalar(0, 255, 0), 2);
+                }
+            }*/
+
+            // Display the current frame on the screen
+            HighGui.imshow("Webcam Feed", input);
+
+            // Wait for a key press to exit the program
+            if (HighGui.waitKey(1) == 27) {
+                break;
+            }
+        }
+        HighGui.destroyAllWindows();
+
+
+       /* Imgproc.cvtColor(input, hsv, Imgproc.COLOR_BGR2HSV);
+
+        // Define the range of orange color in HSV
+        Scalar lowerOrange = new Scalar(0, 70, 75);
+        Scalar upperOrange = new Scalar(20, 255, 255);
+
+        // Threshold the image to get the orange regions
+        Mat mask = new Mat();
+        Core.inRange(hsv, lowerOrange, upperOrange, mask);
+
+        // Apply morphology operations to remove noise and fill gaps
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+        Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_OPEN, kernel);
+        Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_CLOSE, kernel);
+
+        // Find contours of the orange regions
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        // Loop through the contours and filter out small or non-rectangular ones
+        for (MatOfPoint contour : contours) {
+            double area = Imgproc.contourArea(contour);
+            Rect rect = Imgproc.boundingRect(contour);
+            double aspectRatio = (double) rect.width / rect.height;
+            if (area > 1000 && aspectRatio > 0.5 && aspectRatio < 2.0) {
+                // Draw a rectangle around the orange region
+                Imgproc.rectangle(input, rect, new Scalar(0, 255, 0), 2);
+            }
+        }
+*/
+        // Display the result
+        //Imgcodecs.imwrite("output.jpg", input);
+       /* // Load the OpenCV library
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         // Create a new VideoCapture object to get frames from the webcam
@@ -82,6 +177,6 @@ public class Main {
         // Release the VideoCapture object and destroy the window
         capture.release();
         HighGui.destroyAllWindows();
-
+    */
     }
 }
