@@ -73,6 +73,18 @@ public class Main {
                 }
             }*/
 
+            Mat dots = new Mat();
+            List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+            Imgproc.findContours(input, contours, dots, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE, new Point(0,0));
+
+            System.out.println("Test");
+            for (MatOfPoint contour : contours) {
+                Rect rect = Imgproc.boundingRect(contour);
+                System.out.println("x: " + (rect.x + rect.width/2) + ", y: " + (rect.y + rect.height/2));
+                Imgproc.rectangle(input, rect, new Scalar(255, 255, 0), 2);
+            }
+            //Imgproc.GaussianBlur(input, input, new Size(21, 21), 0, 0);
+
             // Display the current frame on the screen
             HighGui.imshow("Webcam Feed", input);
 
